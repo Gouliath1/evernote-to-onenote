@@ -2,7 +2,7 @@
 
 This project started as a script that drove the OneNote desktop app. That version worked, in the sense that notes appeared on screen. It was abandoned, and the reasons are worth writing down — partly to justify the rewrite, partly because the GUI approach is the one most people reach for first.
 
-Both versions were written with an AI assistant, which is part of why the comparison is instructive. The GUI version was built and piloted by **Claude Cowork**, with Claude controlling the Mac directly — taking screenshots, clicking, typing into OneNote, and doing its own hands-on cleanup afterwards. Watching an AI drive a desktop app is genuinely striking, and it did make progress that would have been tedious by hand. But the automation stopped at the screen: the Evernote export itself was still done manually, notebook by notebook, and everything below applies. The rewrite was done with **Claude Code**, working in a shell against the API.
+Both versions were written with an AI assistant, which is part of why the comparison is instructive. The GUI version was built and piloted by **Claude Cowork**, with Claude controlling the Mac directly — driving the Evernote app to export the notebooks in bulk, then clicking and typing its way through OneNote to import them, and doing its own hands-on cleanup afterwards. Watching an AI operate a desktop app end to end is genuinely striking, and it did work that would have been tedious by hand. The rewrite was done with **Claude Code**, working in a shell against the API.
 
 The interesting part is that the second approach looks like less of an achievement and is worth far more.
 
