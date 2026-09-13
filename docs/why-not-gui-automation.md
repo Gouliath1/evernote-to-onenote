@@ -2,6 +2,10 @@
 
 This project started as a script that drove the OneNote desktop app. That version worked, in the sense that notes appeared on screen. It was abandoned, and the reasons are worth writing down — partly to justify the rewrite, partly because the GUI approach is the one most people reach for first.
 
+Both versions were written with an AI assistant, which is part of why the comparison is instructive. The GUI version was built and piloted by **Claude Cowork**, with Claude controlling the Mac directly — taking screenshots, clicking, typing into OneNote, and doing its own hands-on cleanup afterwards. Watching an AI drive a desktop app is genuinely striking, and it did make progress that would have been tedious by hand. But the automation stopped at the screen: the Evernote export itself was still done manually, notebook by notebook, and everything below applies. The rewrite was done with **Claude Code**, working in a shell against the API.
+
+The interesting part is that the second approach looks like less of an achievement and is worth far more.
+
 ## What the GUI version did
 
 AppleScript and the macOS accessibility API, driving OneNote for Mac directly:
@@ -48,5 +52,7 @@ That page id is the thing the GUI version could never have. It makes a ledger po
 The GUI version was not a failure of effort — it was well-debugged, and each individual problem did get solved. It was a failure of surface. Automating a user interface means accepting every constraint the interface places on a human: no atomicity, no error values, no identifiers, no way to ask what is already there. Those constraints are invisible while you are demoing it and fatal when you are migrating an archive.
 
 The API is less impressive to watch. Nothing moves on screen. It is simply correct.
+
+This cuts against the instinct that an AI which can operate your screen is more capable than one confined to a shell. Screen control is the more general capability, and it is the right answer when nothing else exists. But when an API does exist, reaching for the screen gives up atomicity, identifiers, error values and verifiability — and an agent, unlike a person, cannot glance at the window and notice that something looks wrong.
 
 If you are considering the GUI route because no API exists for your target application, the honest advice is: check again, and check whether the data you care about — timestamps especially — is even expressible through the interface you are planning to drive. If it is not, no amount of automation will recover it.
