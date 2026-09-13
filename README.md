@@ -19,6 +19,8 @@ The obvious approach is to script the OneNote desktop app: click "Add page", typ
 
 OneNote's page-creation API accepts `<meta name="created" content="...">`, which is what makes the dates survive. Nothing in the OneNote app exposes that.
 
+This project was in fact built the other way first, driving the OneNote app with AppleScript, before being rewritten. [docs/why-not-gui-automation.md](docs/why-not-gui-automation.md) is the post-mortem.
+
 ## Requirements
 
 - Python 3.9+
