@@ -13,6 +13,7 @@ import json
 import mimetypes
 import random
 import re
+import socket
 import sys
 import time
 import urllib.error
@@ -86,9 +87,14 @@ def request(method, path, tok, body=None, content_type=None, retries=10):
             if e.code == 401:
                 raise GraphError(401, text)
             raise GraphError(e.code, text)
-        except urllib.error.URLError as e:
+        except (urllib.error.URLError, socket.timeout, TimeoutError, OSError) as e:
+            # A bare socket timeout is not a URLError subclass on older
+            # Pythons, so it escapes an except clause that only names
+            # URLError and kills a long run outright.
             if attempt < retries - 1:
-                time.sleep(2 ** attempt)
+                wait = min(60, 2 ** attempt)
+                print(f"    network error ({e}), retrying in {wait:.0f}s", flush=True)
+                time.sleep(wait)
                 continue
             raise GraphError(0, str(e))
     raise GraphError(0, "retries exhausted")
