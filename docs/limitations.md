@@ -21,6 +21,8 @@ An attachment larger than about 3 MB cannot be uploaded at all, because no singl
 
 **A page is not addressable the instant it is created.** `POST /pages` returns an id, but a `PATCH` against it moments later can come back `404`. The importer waits and retries.
 
+**The page listing caps at 100 and gives you no next link.** `GET /sections/{id}/pages` returns at most 100 pages and, unlike the rest of Graph, includes no `@odata.nextLink`. Code that pages by following that link therefore sees the first 100 pages and stops, silently — a section of 249 notes looks like 100. Page with `$skip` instead. This cost real debugging time here: a verification pass reported six notes missing from a section that was in fact complete.
+
 **The page listing is eventually consistent, in both directions.** A page created seconds ago can appear with an empty `title` for several minutes, while its content is perfectly correct. A deleted page can keep appearing in listings, and fetching it returns `404`. Occasionally a page reported as `404` turns out to still exist. Because of this, never verify a migration by counting pages — compare page ids, which is what `--verify` does.
 
 **Deleting a section is not supported for personal notebooks.** `DELETE /sections/{id}` answers `503` every time, permanently. Delete sections by hand in the OneNote app. `cleanup_sections.py` attempts it once, reports the refusal, and moves on rather than retrying.

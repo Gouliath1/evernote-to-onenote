@@ -131,6 +131,27 @@ def record(rec):
 # Sections
 
 
+def all_page_ids(tok, section_id):
+    """Every page id in a section.
+
+    The pages endpoint caps a response at 100 and does NOT return an
+    @odata.nextLink, so anything relying on that link silently sees only the
+    first 100 pages. Paging has to be driven with $skip.
+    """
+    ids = set()
+    skip = 0
+    while True:
+        _, page = request(
+            "GET",
+            f"/me/onenote/sections/{section_id}/pages"
+            f"?$top=100&$skip={skip}&$select=id", tok)
+        got = page.get("value", [])
+        ids |= {p["id"] for p in got}
+        if len(got) < 100:
+            return ids
+        skip += 100
+
+
 def find_notebook(tok, create=False, name=None):
     name = name or NOTEBOOK
     _, data = request("GET", "/me/onenote/notebooks", tok)
@@ -216,7 +237,7 @@ def defer_in_html(html, part):
     return html
 
 
-def patch_when_ready(tok, page_id, payload, ctype, attempts=6):
+def patch_when_ready(tok, page_id, payload, ctype, attempts=9):
     """PATCH a page, tolerating it not being addressable yet.
 
     Creating a page returns its id before OneNote can serve it, so an
@@ -229,7 +250,10 @@ def patch_when_ready(tok, page_id, payload, ctype, attempts=6):
                            tok, payload, ctype)
         except GraphError as e:
             if e.status == 404 and attempt < attempts - 1:
-                wait = 2 * (attempt + 1)
+                # Under load a new page can take well over a minute to become
+                # addressable, so this has to out-wait the service, not just
+                # blink at it.
+                wait = 5 * (attempt + 1)
                 print(f"    page not ready yet, waiting {wait}s", flush=True)
                 time.sleep(wait)
                 continue
@@ -413,13 +437,7 @@ def cmd_verify(args):
             rec = done.get(n["note_id"], {})
             if rec.get("status") == "ok" and rec.get("page_id"):
                 expected[rec["page_id"]] = rec
-        live_ids = set()
-        if name in live:
-            url = f"/me/onenote/sections/{live[name]['id']}/pages?$top=100&$select=id"
-            while url:
-                _, page = request("GET", url, tok)
-                live_ids |= {p["id"] for p in page.get("value", [])}
-                url = page.get("@odata.nextLink")
+        live_ids = all_page_ids(tok, live[name]["id"]) if name in live else set()
         missing = [p for p in expected if p not in live_ids]
         extra = [p for p in live_ids if p not in expected]
         orphans += [(name, p) for p in extra]

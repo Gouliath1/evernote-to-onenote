@@ -18,7 +18,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import msauth  # noqa: E402
 from enex2staging import enex_files, iter_notes, section_name  # noqa: E402
-from onenote_push import find_notebook, request  # noqa: E402
+from onenote_push import all_page_ids, find_notebook, request  # noqa: E402
 
 import config  # noqa: E402
 
@@ -52,12 +52,16 @@ def live_pages(tok, notebook_id):
     out = {}
     for s in data.get("value", []):
         pages = {}
-        url = f"/me/onenote/sections/{s['id']}/pages?$top=100&$select=id,title"
-        while url:
-            _, page = request("GET", url, tok)
-            for p in page.get("value", []):
+        for skip in range(0, 100000, 100):
+            _, page = request(
+                "GET",
+                f"/me/onenote/sections/{s['id']}/pages"
+                f"?$top=100&$skip={skip}&$select=id,title", tok)
+            got = page.get("value", [])
+            for p in got:
                 pages[p["id"]] = p.get("title") or ""
-            url = page.get("@odata.nextLink")
+            if len(got) < 100:
+                break
         out[s["displayName"]] = pages
     return out
 
