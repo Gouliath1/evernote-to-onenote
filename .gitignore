@@ -1,0 +1,23 @@
+# Credentials
+.client_id
+.msal_token.json
+
+# Your notes — never commit these
+enex/
+staging/
+oversized/
+*.enex
+en_backup.db
+ledger.jsonl
+section_overrides.json
+reconcile_problems.txt
+*.log
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# macOS
+.DS_Store
